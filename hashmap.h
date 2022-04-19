@@ -4,10 +4,26 @@
 #include <assert.h>
 #include <string.h>
 
+typedef enum IS_ROOT_{
+  ROOT,
+  NOT_ROOT,
+} IS_ROOT;
 
+typedef enum W_ADD_{
+  HEAD,
+  TAIL,
+} W_ADD;
 
 typedef struct chain_t_ {
-  int value;
+  IS_ROOT cond;
+  union {
+    long value; //use long instead of int because struct uses two 4 bytes (integer) fields
+    struct {
+      int max_cnt;
+      int cur_cnt;
+    };
+  };
+
   struct chain_t_* next;
   struct chain_t_* prev;
 } chain_t;
@@ -34,4 +50,5 @@ int DeleteHashmap(hashmap_t* hashmap);
 static void DeleteList(list_t* list);
 int HashmapCounter(int num, int table_size);
 int compare_elems(chain_t* list_el, int val);
-void InsertToHashmap(hashmap_t* hashmap, hash_t word);
+void InsertToHashmap(hashmap_t* hashmap, chain_t* elem);
+chain_t* Find_num(hashmap_t* hashmap, int value);
