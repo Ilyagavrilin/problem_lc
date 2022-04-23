@@ -52,3 +52,8 @@ int HashmapCounter(int num, int table_size);
 int compare_elems(chain_t* list_el, int val);
 void InsertToHashmap(hashmap_t* hashmap, chain_t* elem);
 chain_t* Find_num(hashmap_t* hashmap, int value);
+chain_t* CreateChain(int max_length);
+void AddToChain(chain_t* root ,chain_t* to_add , W_ADD place);
+void RemoveChainElem(chain_t* root, chain_t* to_remove);
+int LRU(int cache_length, int arr_length, int *arr);
+chain_t* CreateChainElement(int value);

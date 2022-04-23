@@ -45,7 +45,32 @@ static void DeleteList(list_t *list){
   free(list);
 }
 
-int LRU(int cash_num, int *arr);
+int LRU(int cache_length, int arr_length, int *arr) {
+  assert(arr != NULL);
+
+  chain_t* root = CreateChain(cache_length);
+  chain_t* curr;
+  hashmap_t* hashmap = CreateHashmap(cache_length);
+  int cache_hit = 0;
+  for (int i = 0; i < arr_length; i++) {
+    int value = arr[i];
+    if ((curr = Find_num(hashmap, value)) != NULL) {
+      cache_hit++;
+      RemoveChainElem(root, curr);
+      AddToChain(root, curr, HEAD);
+    } else {
+      //cache miss
+      if (root->cur_cnt >= root->max_cnt) {
+        //Change least used element
+      } else {
+        curr = CreateChainElement(arr[i]);
+        AddToChain(root, curr, HEAD);
+        InsertToHashmap(hashmap, curr);
+      }
+    }
+  }
+  return cache_hit;
+}
 
 chain_t* CreateChain(int max_length) {
   chain_t* res;
@@ -61,6 +86,19 @@ chain_t* CreateChain(int max_length) {
   return res;
 }
 
+chain_t* CreateChainElement(int value) {
+  chain_t* res;
+  res = (chain_t*) malloc(sizeof(chain_t));
+  assert(res != NULL);
+
+  res->cond = NOT_ROOT;
+  res->value = value;
+  res->next = NULL;
+  res->prev = NULL;
+
+  return res;
+}
+
 void AddToChain(chain_t* root ,chain_t* to_add , W_ADD place) {
   chain_t* tmp;
   assert(root->cond == ROOT);
@@ -68,6 +106,8 @@ void AddToChain(chain_t* root ,chain_t* to_add , W_ADD place) {
   if (root->cur_cnt == 0) {
     root->next = to_add;
     root->prev = to_add;
+    to_add->next = root;
+    to_add->prev = root;
     root->cur_cnt++;
     assert(root->cur_cnt < root->max_cnt);
   } else {
@@ -77,12 +117,14 @@ void AddToChain(chain_t* root ,chain_t* to_add , W_ADD place) {
         root->next = to_add;
         to_add->prev = root;
         to_add->next = tmp;
+        root->cur_cnt++;
         break;
       case TAIL:
         tmp = root->prev;
         root->prev = to_add;
         to_add->prev = tmp;
         to_add->next = root;
+        root->cur_cnt++;
         break;
       default:
         assert("Undefined data value" == 0);
@@ -99,7 +141,6 @@ void RemoveChainElem(chain_t* root, chain_t* to_remove) {
     free(to_remove);
     root->next = NULL;
     root->prev = NULL;
-    root->cur_cnt--;
   } else {
     chain_t* prev_tmp, *next_tmp;
     prev_tmp = to_remove->prev;
@@ -108,6 +149,7 @@ void RemoveChainElem(chain_t* root, chain_t* to_remove) {
     prev_tmp->next = next_tmp;
     free(to_remove);
   }
+  root->cur_cnt--;
 }
 
 chain_t* Find_num(hashmap_t* hashmap, int value) {
